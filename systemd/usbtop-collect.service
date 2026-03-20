@@ -1,0 +1,37 @@
+[Unit]
+Description=USB bandwidth metrics collector (usbmon → Elastic)
+Documentation=https://github.com/your-org/usbtop-elastic
+After=network.target
+
+# Require usbmon to be loaded before starting.
+# If usbmon is not loaded at boot, the install script places a file in
+# /etc/modules-load.d/ so it will be present by the time this unit starts.
+
+[Service]
+Type=simple
+ExecStart=/opt/usbtop-elastic/bin/usbmon-collector
+
+# usbmon requires CAP_NET_RAW (pcap) and access to /sys — run as root.
+User=root
+
+# Restart automatically on failure; back off up to 5 minutes.
+Restart=on-failure
+RestartSec=10
+StartLimitInterval=300
+StartLimitBurst=5
+
+# Environment overrides (uncomment and adjust as needed)
+#Environment=USBMON_OUTPUT_FILE=/var/log/usbtop-metrics/usbtop.ndjson
+#Environment=USBMON_INTERVAL_SEC=60
+#Environment=USBMON_LOG_LEVEL=INFO
+
+# Legacy variable names are also accepted (no service-file change needed
+# when migrating from the Python collector):
+#Environment=USBTOP_OUTPUT_FILE=/var/log/usbtop-metrics/usbtop.ndjson
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=usbtop-collect
+
+[Install]
+WantedBy=multi-user.target

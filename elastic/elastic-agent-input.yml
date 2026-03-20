@@ -1,0 +1,36 @@
+# ---------------------------------------------------------------------------
+# Elastic Agent — custom_logs integration snippet for usbtop metrics
+#
+# If you manage your agent via Fleet UI:
+#   1. Go to Fleet → Agent Policies → your policy
+#   2. Add integration → Custom Logs
+#   3. Set "Log file path" to /var/log/usbtop-metrics/usbtop.ndjson
+#   4. Enable "Parse JSON messages"
+#   5. Leave "JSON target field" blank (merges into root document)
+#
+# If you manage elastic-agent.yml directly, add the block below
+# under the `inputs:` section of your agent policy.
+# ---------------------------------------------------------------------------
+
+inputs:
+  - type: logfile
+    id: usbtop-ndjson-metrics
+    data_stream:
+      dataset: usbtop.metrics
+      namespace: default
+    paths:
+      - /var/log/usbtop-metrics/usbtop.ndjson
+    parsers:
+      - ndjson:
+          target: ""           # merge JSON keys into root document
+          add_error_key: true  # surface parse errors as event.error
+    processors:
+      - add_fields:
+          target: event
+          fields:
+            dataset: usbtop.metrics
+            module: usbtop
+    # Ensure the agent picks up rotated files
+    close_inactive: 5m
+    scan_frequency: 10s
+    harvester_limit: 1

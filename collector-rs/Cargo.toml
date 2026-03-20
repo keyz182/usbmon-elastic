@@ -1,0 +1,21 @@
+[package]
+name    = "usbmon-collector"
+version = "0.1.0"
+edition = "2021"
+description = "Streams USB bandwidth metrics from usbmon via libpcap and emits NDJSON for Elastic Agent"
+
+[[bin]]
+name = "usbmon-collector"
+path = "src/main.rs"
+
+[dependencies]
+# libpcap bindings — requires libpcap-dev on the build host
+pcap = "1"
+# libc for signal handler registration (SIGTERM / SIGINT)
+libc = "0.2"
+
+[profile.release]
+# Optimise for size on the Pi — negligible on modern hardware but good practice
+opt-level = "z"
+lto        = true
+strip      = true

@@ -1,0 +1,17 @@
+# Rust build artefacts
+collector-rs/target/
+Cargo.lock
+
+# Legacy tarball
+*.tar.gz
+
+# Debug output
+*.ndjson
+/tmp/
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*~

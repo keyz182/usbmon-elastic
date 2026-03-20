@@ -1,0 +1,11 @@
+/var/log/usbtop-metrics/usbtop.ndjson {
+    daily
+    rotate 7
+    compress
+    delaycompress
+    missingok
+    notifempty
+    # copytruncate avoids any gap between Elastic Agent reads
+    copytruncate
+    create 640 root root
+}
