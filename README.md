@@ -98,15 +98,18 @@ Fill in the form as follows:
 |---|---|
 | **Integration name** | `usbtop-metrics` (or any descriptive name) |
 | **Log file path** | `/var/log/usbtop-metrics/usbtop.ndjson` |
+| **Datastream type** | `Metrics` |
 | **Dataset name** | `usbtop.metrics` |
 
-Scroll down to **Advanced options** and set:
+In the **Parsers** YAML field, replace the default content with:
 
-| Field | Value |
-|---|---|
-| **JSON message keys** | Enable **Expand keys** |
-| **JSON target field** | *(leave blank)* — this merges all JSON fields into the root document |
-| **Add error key** | Enable — surfaces NDJSON parse failures as `event.error` |
+```yaml
+- ndjson:
+    target: ""
+    add_error_key: true
+```
+
+`target: ""` merges all JSON keys into the root document rather than nesting them under a field. `add_error_key: true` surfaces any NDJSON parse failures as `event.error` so they are visible in Discover.
 
 Leave all other fields at their defaults.
 
@@ -117,7 +120,7 @@ Click **Save and deploy changes**. Fleet will push the updated policy to your ag
 Allow one full interval (default 60 s) for the first document to be written, then:
 
 1. In Kibana, go to **Discover**.
-2. Select the **`logs-*`** data view (or create one if it does not exist).
+2. Select the **`metrics-*`** data view (or create one if it does not exist).
 3. In the search bar, filter by: `event.dataset : "usbtop.metrics"`
 4. You should see documents with `usbtop.bus`, `usbtop.device`, `usbtop.in_kbps`, and `usbtop.out_kbps` fields.
 
@@ -127,7 +130,7 @@ If no documents appear after two intervals, work through the troubleshooting sec
 
 1. Go to **Management → Data Views**.
 2. Click **Create data view**.
-3. Set **Index pattern** to `logs-usbtop.metrics-*`.
+3. Set **Index pattern** to `metrics-usbtop.metrics-*`.
 4. Set **Timestamp field** to `@timestamp`.
 5. Save. This gives you a clean view scoped to USB metrics in Discover and Lens.
 
@@ -227,15 +230,15 @@ sudo ls -lh /var/log/usbtop-metrics/
 Run this in Kibana **Dev Tools → Console** to check whether the index exists and has documents:
 
 ```
-GET logs-usbtop.metrics-default/_count
+GET metrics-usbtop.metrics-default/_count
 ```
 
 If the count is 0 or the index is missing:
 
 1. Confirm the NDJSON file is being written and contains valid JSON: `tail -1 /var/log/usbtop-metrics/usbtop.ndjson | python3 -m json.tool`
 2. In Fleet → Agent Policies, check the integration is saved and deployed (green tick next to your policy).
-3. Check the data stream exists: `GET _data_stream/logs-usbtop.metrics-*`
-4. If the data stream is missing, the integration may not have been saved correctly — re-add it and ensure the **Dataset name** is exactly `usbtop.metrics`.
+3. Check the data stream exists: `GET _data_stream/metrics-usbtop.metrics-*`
+4. If the data stream is missing, the integration may not have been saved correctly — re-add it and ensure **Datastream type** is `Metrics` and **Dataset name** is exactly `usbtop.metrics`.
 
 ### Enable debug logging
 
