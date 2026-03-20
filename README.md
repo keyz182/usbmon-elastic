@@ -1,5 +1,8 @@
 # usbmon-elastic
 
+> [!WARNING]
+> I have been experimenting with LLMs - this repo is 100% LLM code. Use at your own risk!
+
 Captures live USB bandwidth metrics directly from the Linux kernel's `usbmon` subsystem and ships them to Elasticsearch via the Elastic Agent `custom_logs` input.
 
 ## How it works
