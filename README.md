@@ -17,9 +17,9 @@ There is no dependency on `usbtop`, no pseudo-terminal, and no polling — the d
 ## Requirements
 
 - Debian 11+ or Raspberry Pi OS (Bullseye / Bookworm)
-- `libpcap-dev` and `build-essential` (installed automatically)
-- Rust toolchain — installed automatically via `rustup` if not present
-- `usbmon` kernel module — loaded and persisted automatically
+- `libpcap-dev` and `build-essential`
+- Rust toolchain (`cargo`)
+- `usbmon` kernel module
 - Elastic Agent installed and enrolled in Fleet (or running standalone)
 
 ---
@@ -27,26 +27,24 @@ There is no dependency on `usbtop`, no pseudo-terminal, and no polling — the d
 ## Install
 
 ```bash
-git clone https://github.com/your-org/usbmon-elastic
+# Install build dependencies (once)
+apt-get install -y libpcap-dev build-essential
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal
+source ~/.cargo/env
+
+# Clone, build, and install
+git clone https://github.com/keyz182/usbmon-elastic
 cd usbmon-elastic
-sudo bash install.sh
+make
+sudo make install
 ```
 
-The install script will:
-
-1. Install `libpcap-dev` and `build-essential` if missing
-2. Install the Rust toolchain via `rustup` if `cargo` is not found
-3. Load the `usbmon` kernel module and persist it across reboots
-4. Build the collector with `cargo build --release`
-5. Install the binary to `/opt/usbtop-elastic/bin/usbmon-collector`
-6. Create `/var/log/usbtop-metrics/`
-7. Install and enable the systemd service
-8. Install a logrotate config
+`make` compiles the release binary as your normal user. `sudo make install` then loads usbmon, installs the binary, enables the systemd service, and sets up logrotate.
 
 ### Uninstall
 
 ```bash
-sudo bash install.sh --uninstall
+sudo make uninstall
 ```
 
 ---
@@ -56,8 +54,7 @@ sudo bash install.sh --uninstall
 The collector is configured via environment variables in the systemd service file. To change a value, edit `/etc/systemd/system/usbtop-collect.service`, uncomment the relevant `Environment=` line, then reload:
 
 ```bash
-sudo systemctl daemon-reload
-sudo systemctl restart usbtop-collect.service
+sudo systemctl daemon-reload && sudo systemctl restart usbtop-collect.service
 ```
 
 | Variable | Default | Description |
@@ -272,6 +269,6 @@ usbmon-elastic/
 ├── tools/
 │   ├── usbtop_debug.py         # Debug helper — dumps raw usbmon text output
 │   └── usbtop_collect.py       # Legacy Python collector (reference only)
-├── install.sh
+├── Makefile
 └── README.md
 ```

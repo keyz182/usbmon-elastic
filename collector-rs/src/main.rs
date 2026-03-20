@@ -338,8 +338,8 @@ fn main() {
 
     // Register signal handlers so SIGTERM / SIGINT set SHOULD_STOP gracefully.
     unsafe {
-        libc::signal(libc::SIGTERM, on_signal as libc::sighandler_t);
-        libc::signal(libc::SIGINT,  on_signal as libc::sighandler_t);
+        libc::signal(libc::SIGTERM, on_signal as *const () as libc::sighandler_t);
+        libc::signal(libc::SIGINT,  on_signal as *const () as libc::sighandler_t);
     }
 
     eprintln!("[INFO]  usbmon-collector starting");
